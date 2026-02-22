@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳門法律問答系統</title>
+    <style>
+        :root {
+            --primary: #1a5fb4;
+            --primary-dark: #104a8e;
+            --secondary: #26a269;
+            --accent: #e66100;
+            --bg: #f6f8fa;
+            --card: #ffffff;
+            --text: #1f2328;
+            --text-secondary: #656d76;
+            --border: #d0d7de;
+            --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 95, 180, 0.1);
+        }
+
+        .search-btn {
+            padding: 0.875rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .search-btn:active {
+            transform: scale(0.98);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .search-btn .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Quick Tags */
+        .quick-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .quick-tag {
+            padding: 0.375rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-tag:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .summary-card h3 {
+            color: var(--primary);
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-card p {
+            color: var(--text);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        /* Answer Card */
+        .answer-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .answer-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .answer-content {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text);
+        }
+
+        .answer-content p {
+            margin-bottom: 0.75rem;
+        }
+
+        /* Laws Section */
+        .laws-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .law-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            transition: box-shadow 0.2s;
+        }
+
+        .law-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .law-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .law-title {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .law-number {
+            background: var(--bg);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .law-article {
+            font-weight: 500;
+            color: var(--secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .law-content {
+            color: var(--text);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 0.75rem;
+        }
+
+        .law-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .law-date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .law-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .law-link:hover {
+            text-decoration: underline;
+        }
+
+        .relevance-badge {
+            background: var(--secondary);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        /* History Section */
+        .history-section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-header h3 {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .clear-history {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .clear-history:hover {
+            color: var(--accent);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .history-item {
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .history-item:hover {
+            background: #e3f2fd;
+            border-color: var(--primary);
+        }
+
+        .history-query {
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .history-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        /* Settings Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card);
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.1rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-hint {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .modal-footer {
+            padding: 1.25rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Settings Button */
+        .settings-btn {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: transform 0.2s;
+        }
+
+        .settings-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Error Message */
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #c62828;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .law-header {
+                flex-direction: column;
+            }
+        }
+
+        /* Icons */
+        .icon::before {
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>⚖️ 澳門法律問答系統</h1>
+        <p>基於澳門特區公報及法務局資料的智能法律助手</p>
+    </header>
+
+    <main class="container">
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput"
+                    placeholder="輸入您的法律問題，例如：消費者權益、租賃合同、交通事故..."
+                    autocomplete="off"
+                >
+                <button class="search-btn" id="searchBtn" onclick="performSearch()">
+                    <span>搜尋</span>
+                </button>
+            </div>
+            <div class="quick-tags">
+                <span class="quick-tag" onclick="setQuery('消費者權益')">消費者權益</span>
+                <span class="quick-tag" onclick="setQuery('租賃合同')">租賃合同</span>
+                <span class="quick-tag" onclick="setQuery('勞動糾紛')">勞動糾紛</span>
+                <span class="quick-tag" onclick="setQuery('交通事故')">交通事故</span>
+                <span class="quick-tag" onclick="setQuery('物業管理')">物業管理</span>
+                <span class="quick-tag" onclick="setQuery('離婚程序')">離婚程序</span>
+            </div>
+        </section>
+
+        <!-- Error Container -->
+        <div id="errorContainer"></div>
+
+        <!-- Results Section -->
+        <section class="results-section" id="resultsSection">
+            <!-- Summary -->
+            <div class="summary-card">
+                <h3>📋 摘要</h3>
+                <p id="summaryText"></p>
+            </div>
+
+            <!-- AI Answer -->
+            <div class="answer-card">
+                <h3>🤖 AI 分析</h3>
+                <div class="answer-content" id="answerContent"></div>
+            </div>
+
+            <!-- Related Laws -->
+            <div class="laws-section">
+                <h3 class="section-title">📚 相關法條</h3>
+                <div id="lawsContainer"></div>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section class="history-section">
+            <div class="history-header">
+                <h3>🕐 搜尋歷史</h3>
+                <button class="clear-history" onclick="clearHistory()">清除歷史</button>
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="empty-history">暫無搜尋記錄</div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>數據來源：<a href="https://bo.io.gov.mo" target="_blank">澳門特區公報</a>、<a href="https://www.dsaj.gov.mo" target="_blank">法務局</a></p>
+        <p style="margin-top: 0.5rem;">⚠️ 本系統僅供參考，不構成法律意見</p>
+    </footer>
+
+    <!-- Settings Button -->
+    <button class="settings-btn" onclick="openSettings()" title="設置">⚙️</button>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>⚙️ 系統設置</h3>
+                <button class="modal-close" onclick="closeSettings()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="supabaseUrl">Supabase URL</label>
+                    <input type="text" id="supabaseUrl" placeholder="https://your-project.supabase.co">
+                    <div class="form-hint">您的 Supabase 項目 URL</div>
+                </div>
+                <div class="form-group">
+                    <label for="supabaseKey">Supabase Anon Key</label>
+                    <input type="password" id="supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIs...">
+                    <div class="form-hint">在 Supabase 項目設置中獲取</div>
+                </div>
+                <div class="form-group">
+                    <label for="kimiKey">Kimi API Key（可選）</label>
+                    <input type="password" id="kimiKey" placeholder="sk-...">
+                    <div class="form-hint">用於 AI 分析功能，<a href="https://platform.moonshot.cn" target="_blank">在此獲取</a></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSettings()">取消</button>
+                <button class="btn btn-primary" onclick="saveSettings()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置
+        const CONFIG = {
+            supabaseUrl: localStorage.getItem('supabaseUrl') || '',
+            supabaseKey: localStorage.getItem('supabaseKey') || '',
+            kimiKey: localStorage.getItem('kimiKey') || ''
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHistory();
+            
+            // Enter 鍵搜尋
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+        });
+
+        // 設置查詢
+        function setQuery(query) {
+            document.getElementById('searchInput').value = query;
+            performSearch();
+        }
+
+        // 執行搜尋
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+
+            const btn = document.getElementById('searchBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span><span>搜尋中...</span>';
+            btn.disabled = true;
+            document.getElementById('errorContainer').innerHTML = '';
+
+            try {
+                // 檢查配置
+                if (!CONFIG.supabaseUrl || !CONFIG.supabaseKey) {
+                    throw new Error('請先設置 Supabase 配置（點擊右下角設置按鈕）');
+                }
+
+                // 調用 Edge Function
+                const response = await fetch(`${CONFIG.supabaseUrl}/functions/v1/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${CONFIG.supabaseKey}`
+                    },
+                    body: JSON.stringify({ query })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '搜尋失敗');
+                }
+
+                const data = await response.json();
+                displayResults(data);
+                addToHistory(query, data);
+
+            } catch (error) {
+                showError(error.message);
+                // 使用本地模式（演示用）
+                performLocalSearch(query);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // 本地搜尋模式（演示用）
+        function performLocalSearch(query) {
+            // 模擬法律數據
+            const mockLaws = [
+                {
+                    law_number: "第17/2004號法律",
+                    law_title: "消費者權益保護法",
+                    article_number: "第5條",
+                    content: "消費者享有獲得正確資訊的權利，商家必須提供真實、準確的商品或服務資訊。",
+                    url: "https://bo.io.gov.mo/bo/i/2004/34/lei17_cn.asp",
+                    publication_date: "2004-08-16",
+                    relevance_score: 0.95
+                },
+                {
+                    law_number: "第17/2004號法律",
+                    law_title: "消費者權益保護法",
+                    article_number: "第10條",
+                    content: "經營者以廣告或其他方式對商品或服務的價格、品質、來源等作虛假或引人誤解的宣傳，消費者有權要求賠償。",
+                    url: "https://bo.io.gov.mo/bo/i/2004/34/lei17_cn.asp",
+                    publication_date: "2004-08-16",
+                    relevance_score: 0.88
+                }
+            ];
+
+            const data = {
+                success: true,
+                query: query,
+                summary: `根據您的查詢「${query}」，找到 ${mockLaws.length} 條相關法律條文。主要涉及消費者權益保護相關規定。`,
+                answer: `關於您的問題「${query}」，根據澳門法律規定：\n\n1. **消費者權利**：消費者享有獲得正確資訊的權利，包括商品或服務的真實資訊。\n\n2. **經營者義務**：經營者不得作虛假或引人誤解的宣傳。\n\n3. **法律責任**：如權益受損，消費者可向消費者委員會投訴或循法律途徑追討賠償。`,
+                laws: mockLaws,
+                law_count: mockLaws.length
+            };
+
+            displayResults(data);
+            addToHistory(query, data);
+        }
+
+        // 顯示結果
+        function displayResults(data) {
+            document.getElementById('summaryText').textContent = data.summary || '';
+            
+            // 格式化回答（支援換行）
+            const answerHtml = data.answer
+                ? data.answer.replace(/\n/g, '<br>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                : '';
+            document.getElementById('answerContent').innerHTML = answerHtml;
+
+            // 顯示法條
+            const lawsContainer = document.getElementById('lawsContainer');
+            lawsContainer.innerHTML = '';
+
+            if (data.laws && data.laws.length > 0) {
+                data.laws.forEach(law => {
+                    const lawCard = document.createElement('div');
+                    lawCard.className = 'law-card';
+                    lawCard.innerHTML = `
+                        <div class="law-header">
+                            <span class="law-title">${escapeHtml(law.law_title)}</span>
+                            <span class="law-number">${escapeHtml(law.law_number)}</span>
+                        </div>
+                        <div class="law-article">${escapeHtml(law.article_number)}</div>
+                        <div class="law-content">${escapeHtml(law.content)}</div>
+                        <div class="law-footer">
+                            <span class="law-date">刊登日期：${law.publication_date || '未知'}</span>
+                            <div>
+                                <span class="relevance-badge">相關度: ${Math.round((law.relevance_score || 0) * 100)}%</span>
+                                ${law.url ? `<a href="${law.url}" target="_blank" class="law-link">查看原文 →</a>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    lawsContainer.appendChild(lawCard);
+                });
+            } else {
+                lawsContainer.innerHTML = '<p style="color: var(--text-secondary);">未找到相關法條</p>';
+            }
+
+            document.getElementById('resultsSection').classList.add('active');
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 顯示錯誤
+        function showError(message) {
+            document.getElementById('errorContainer').innerHTML = `
+                <div class="error-message">❌ ${escapeHtml(message)}</div>
+            `;
+        }
+
+        // 添加到歷史
+        function addToHistory(query, data) {
+            const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+            history.unshift({
+                query,
+                summary: data.summary,
+                lawCount: data.law_count,
+                timestamp: new Date().toISOString()
+            });
+            
+            // 只保留最近 20 條
+            if (history.length > 20) history.pop();
+            
+            localStorage.setItem('searchHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        // 載入歷史
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+            const container = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                container.innerHTML = '<div class="empty-history">暫無搜尋記錄</div>';
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="history-item" onclick="setQuery('${escapeHtml(item.query)}')">
+                    <div class="history-query">${escapeHtml(item.query)}</div>
+                    <div class="history-meta">
+                        <span>${formatDate(item.timestamp)}</span>
+                        <span>${item.lawCount || 0} 條相關法條</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 清除歷史
+        function clearHistory() {
+            if (confirm('確定要清除所有搜尋歷史嗎？')) {
+                localStorage.removeItem('searchHistory');
+                loadHistory();
+            }
+        }
+
+        // 打開設置
+        function openSettings() {
+            document.getElementById('supabaseUrl').value = CONFIG.supabaseUrl;
+            document.getElementById('supabaseKey').value = CONFIG.supabaseKey;
+            document.getElementById('kimiKey').value = CONFIG.kimiKey;
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        // 關閉設置
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        // 保存設置
+        function saveSettings() {
+            CONFIG.supabaseUrl = document.getElementById('supabaseUrl').value.trim();
+            CONFIG.supabaseKey = document.getElementById('supabaseKey').value.trim();
+            CONFIG.kimiKey = document.getElementById('kimiKey').value.trim();
+
+            localStorage.setItem('supabaseUrl', CONFIG.supabaseUrl);
+            localStorage.setItem('supabaseKey', CONFIG.supabaseKey);
+            localStorage.setItem('kimiKey', CONFIG.kimiKey);
+
+            closeSettings();
+            alert('設置已保存！');
+        }
+
+        // 工具函數
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleDateString('zh-TW', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // 點擊模態框外部關閉
+        document.getElementById('settingsModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('settingsModal')) {
+                closeSettings();
+            }
+        });
+    </script>
+</body>
+</html>
